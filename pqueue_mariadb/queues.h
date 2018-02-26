@@ -39,22 +39,14 @@ extern "C" {
 #endif
 
 typedef unsigned int uint;
-typedef unsigned char uchar;
-typedef int compare_fun(void * env, uchar * a,uchar * b);
 
 typedef struct st_queue {
-  uchar **root;
-  void *first_cmp_arg;
+  int *root;
   uint elements;
   uint max_elements;
-  uint offset_to_key;          /* compare is done on element+offset */
-  uint offset_to_queue_pos;    /* If we want to store position in element */
-  uint auto_extent;
-  int max_at_top;	/* Normally 1, set to -1 if queue_top gives max */
-  compare_fun *compare;
 } QUEUE;
 
-void _downheap(QUEUE *queue, uint idx, uchar *element);
+void _downheap(QUEUE *queue, uint idx, int element);
 
 #ifdef	__cplusplus
 }

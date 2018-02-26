@@ -61,39 +61,28 @@ typedef char    my_bool;
     This only works if element is >= all elements <= start_idx
 */
 
-void _downheap(register QUEUE *queue, uint start_idx, uchar *element)
+void _downheap(QUEUE *queue, uint start_idx, int element)
 {
-  uint elements,half_queue,offset_to_key, next_index, offset_to_queue_pos;
+  uint elements,half_queue, next_index;
   register uint idx= start_idx;
   my_bool first= TRUE;
 
-  offset_to_key=queue->offset_to_key;
-  offset_to_queue_pos= queue->offset_to_queue_pos;
   half_queue= (elements= queue->elements) >> 1;
 
   while (idx <= half_queue)
   {
     next_index=idx+idx;
     if (next_index < elements &&
-	(queue->compare(queue->first_cmp_arg,
-			queue->root[next_index]+offset_to_key,
-			queue->root[next_index+1]+offset_to_key) *
-	 queue->max_at_top) > 0)
+        queue->root[next_index] > queue->root[next_index+1])
       next_index++;
-    if (first && 
-        (((queue->compare(queue->first_cmp_arg,
-                          queue->root[next_index]+offset_to_key,
-                          element+offset_to_key) * queue->max_at_top) >= 0)))
+    if (first &&
+	queue->root[next_index] >= element)
     {
       queue->root[idx]= element;
-      if (offset_to_queue_pos)
-        (*(uint*) (element + offset_to_queue_pos-1))= idx;
       return;
     }
     first= FALSE;
     queue->root[idx]= queue->root[next_index];
-    if (offset_to_queue_pos)
-      (*(uint*) (queue->root[idx] + offset_to_queue_pos-1))= idx;
     idx=next_index;
   }
 
@@ -102,19 +91,12 @@ void _downheap(register QUEUE *queue, uint start_idx, uchar *element)
     as we have in queue_insert()
   */
   while ((next_index= (idx >> 1)) > start_idx &&
-         queue->compare(queue->first_cmp_arg,
-                        element+offset_to_key,
-                        queue->root[next_index]+offset_to_key)*
-         queue->max_at_top < 0)
+         element < queue->root[next_index])
   {
     queue->root[idx]= queue->root[next_index];
-    if (offset_to_queue_pos)
-      (*(uint*) (queue->root[idx] + offset_to_queue_pos-1))= idx;
     idx= next_index;
   }
   queue->root[idx]= element;
-  if (offset_to_queue_pos)
-    (*(uint*) (element + offset_to_queue_pos-1))= idx;
 }
 
 
