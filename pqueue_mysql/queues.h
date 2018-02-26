@@ -25,7 +25,13 @@
   By monty.
 */
 
-#include "my_global.h"                          /* uchar */
+#define NULL ((void*) 0)
+
+typedef unsigned int uint;
+typedef unsigned char uchar;
+typedef char	pchar;
+typedef char	pbool;
+typedef char    my_bool;
 
 #ifdef	__cplusplus
 extern "C" {

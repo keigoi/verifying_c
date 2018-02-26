@@ -25,10 +25,29 @@
   of queue_fix was implemented.
 */
 
-#include "mysys_priv.h"
-#include "my_sys.h"
-#include "mysys_err.h"
-#include <queues.h>
+#include "queues.h"
+
+#include <stdlib.h>
+#include <assert.h>
+
+#define DBUG_ENTER(s)
+#define DBUG_RETURN(e) return (e)
+#define DBUG_VOID_RETURN return
+#define DBUG_ASSERT assert
+#define reg2 register
+
+typedef char    my_bool;
+#define TRUE 1
+#define FALSE 0
+#define set_if_smaller(a,b) { if ((a) > (b)) (a)=(b); }
+
+#define my_malloc(k,s,f) malloc(s)
+#define my_realloc(k,p,s,f) realloc(p,s)
+#define my_free(p) free(p)
+
+typedef int myf;
+#define MYF(v) (myf) (v)
+#define MY_WME		16	/* Write message on error */
 
 int resize_queue(QUEUE *queue, uint max_elements);
 
