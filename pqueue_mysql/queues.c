@@ -34,7 +34,6 @@
 #define DBUG_RETURN(e) return (e)
 #define DBUG_VOID_RETURN return
 #define DBUG_ASSERT assert
-#define reg2 register
 
 typedef char    my_bool;
 #define TRUE 1
@@ -73,7 +72,7 @@ int resize_queue(QUEUE *queue, uint max_elements);
 */
 
 int init_queue(QUEUE *queue, uint max_elements, uint offset_to_key,
-	       pbool max_at_top, int (*compare) (void *, uchar *, uchar *),
+	       pbool max_at_top, queue_compare compare,
 	       void *first_cmp_arg)
 {
   DBUG_ENTER("init_queue");
@@ -117,7 +116,7 @@ int init_queue(QUEUE *queue, uint max_elements, uint offset_to_key,
 */
 
 int init_queue_ex(QUEUE *queue, uint max_elements, uint offset_to_key,
-	       pbool max_at_top, int (*compare) (void *, uchar *, uchar *),
+	       pbool max_at_top, queue_compare compare,
 	       void *first_cmp_arg, uint auto_extent)
 {
   int ret;
@@ -154,7 +153,7 @@ int init_queue_ex(QUEUE *queue, uint max_elements, uint offset_to_key,
 */
 
 int reinit_queue(QUEUE *queue, uint max_elements, uint offset_to_key,
-		 pbool max_at_top, int (*compare) (void *, uchar *, uchar *),
+		 pbool max_at_top, queue_compare compare,
 		 void *first_cmp_arg)
 {
   DBUG_ENTER("reinit_queue");

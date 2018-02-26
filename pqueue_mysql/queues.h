@@ -26,12 +26,14 @@
 */
 
 #define NULL ((void*) 0)
+#define inline
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef char	pchar;
 typedef char	pbool;
 typedef char    my_bool;
+typedef int compare_fun(void * env, uchar * a,uchar * b);
 
 #ifdef	__cplusplus
 extern "C" {
@@ -44,7 +46,7 @@ typedef struct st_queue {
   uint max_elements;
   uint offset_to_key;	/* compare is done on element+offset */
   int max_at_top;	/* Normally 1, set to -1 if queue_top gives max */
-  int  (*compare)(void *, uchar *,uchar *);
+  compare_fun *compare;
   uint auto_extent;
 } QUEUE;
 
@@ -55,7 +57,7 @@ void queue_fix(QUEUE *queue);
 #define queue_element(queue,index) ((queue)->root[index+1])
 #define queue_end(queue) ((queue)->root[(queue)->elements])
 
-static inline void queue_replaced(QUEUE *queue)
+static void queue_replaced(QUEUE *queue)
 {
   _downheap(queue, 1);
 }
@@ -65,7 +67,7 @@ static inline void queue_set_max_at_top(QUEUE *queue, int set_arg)
   queue->max_at_top= set_arg ? -1 : 1;
 }
 
-typedef int (*queue_compare)(void *,uchar *, uchar *);
+typedef compare_fun *queue_compare;
 
 int init_queue(QUEUE *queue,uint max_elements,uint offset_to_key,
 	       pbool max_at_top, queue_compare compare,
