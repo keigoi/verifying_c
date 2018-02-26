@@ -92,7 +92,7 @@ typedef int myf;
 */
 
 int init_queue(QUEUE *queue, uint max_elements, uint offset_to_key,
-	       pbool max_at_top, int (*compare) (void *, uchar *, uchar *),
+	       pbool max_at_top, queue_compare compare,
 	       void *first_cmp_arg, uint offset_to_queue_pos,
                uint auto_extent)
                
@@ -131,7 +131,7 @@ int init_queue(QUEUE *queue, uint max_elements, uint offset_to_key,
 */
 
 int reinit_queue(QUEUE *queue, uint max_elements, uint offset_to_key,
-		 pbool max_at_top, int (*compare) (void *, uchar *, uchar *),
+		 pbool max_at_top, queue_compare compare,
 		 void *first_cmp_arg, uint offset_to_queue_pos,
                  uint auto_extent)
 {

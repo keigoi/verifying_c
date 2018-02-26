@@ -42,6 +42,7 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef char	pchar;
 typedef char	pbool;
+typedef int compare_fun(void * env, uchar * a,uchar * b);
 
 typedef struct st_queue {
   uchar **root;
@@ -52,7 +53,7 @@ typedef struct st_queue {
   uint offset_to_queue_pos;    /* If we want to store position in element */
   uint auto_extent;
   int max_at_top;	/* Normally 1, set to -1 if queue_top gives max */
-  int  (*compare)(void *, uchar *,uchar *);
+  compare_fun *compare;
 } QUEUE;
 
 #define queue_first_element(queue) 1
@@ -66,7 +67,7 @@ typedef struct st_queue {
 #define queue_set_max_at_top(queue, set_arg) \
   (queue)->max_at_top= set_arg ? -1 : 1
 #define queue_remove_top(queue_arg) queue_remove((queue_arg), queue_first_element(queue_arg))
-typedef int (*queue_compare)(void *,uchar *, uchar *);
+typedef compare_fun *queue_compare;
 
 int init_queue(QUEUE *queue,uint max_elements,uint offset_to_key,
 	       pbool max_at_top, queue_compare compare,
