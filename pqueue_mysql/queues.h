@@ -51,54 +51,7 @@ typedef struct st_queue {
 } QUEUE;
 
 void _downheap(QUEUE *queue,uint idx);
-void queue_fix(QUEUE *queue);
 
-#define queue_top(queue) ((queue)->root[1])
-#define queue_element(queue,index) ((queue)->root[index+1])
-#define queue_end(queue) ((queue)->root[(queue)->elements])
-
-static void queue_replaced(QUEUE *queue)
-{
-  _downheap(queue, 1);
-}
-
-static inline void queue_set_max_at_top(QUEUE *queue, int set_arg)
-{
-  queue->max_at_top= set_arg ? -1 : 1;
-}
-
-typedef compare_fun *queue_compare;
-
-int init_queue(QUEUE *queue,uint max_elements,uint offset_to_key,
-	       pbool max_at_top, queue_compare compare,
-	       void *first_cmp_arg);
-int init_queue_ex(QUEUE *queue,uint max_elements,uint offset_to_key,
-	       pbool max_at_top, queue_compare compare,
-	       void *first_cmp_arg, uint auto_extent);
-int reinit_queue(QUEUE *queue,uint max_elements,uint offset_to_key,
-                 pbool max_at_top, queue_compare compare,
-                 void *first_cmp_arg);
-void delete_queue(QUEUE *queue);
-void queue_insert(QUEUE *queue,uchar *element);
 uchar *queue_remove(QUEUE *queue,uint idx);
-
-static inline void queue_remove_all(QUEUE *queue)
-{
-  queue->elements= 0;
-}
-
-static inline my_bool queue_is_full(QUEUE *queue)
-{
-  return queue->elements == queue->max_elements;
-}
-
-static inline my_bool is_queue_inited(QUEUE *queue)
-{
-  return queue->root != NULL;
-}
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif  // QUEUES_INCLUDED
