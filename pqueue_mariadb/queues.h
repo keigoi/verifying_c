@@ -38,6 +38,11 @@
 extern "C" {
 #endif
 
+typedef unsigned int uint;
+typedef unsigned char uchar;
+typedef char	pchar;
+typedef char	pbool;
+
 typedef struct st_queue {
   uchar **root;
   void *first_cmp_arg;
