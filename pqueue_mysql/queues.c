@@ -40,21 +40,12 @@ typedef char    my_bool;
 #define FALSE 0
 #define set_if_smaller(a,b) { if ((a) > (b)) (a)=(b); }
 
-#define my_malloc(k,s,f) malloc(s)
-#define my_realloc(k,p,s,f) realloc(p,s)
-#define my_free(p) free(p)
-
-typedef int myf;
-#define MYF(v) (myf) (v)
-#define MY_WME		16	/* Write message on error */
-
-
 	/* Remove item from queue */
 	/* Returns pointer to removed element */
 
-uchar *queue_remove(QUEUE *queue, uint idx)
+int queue_remove(QUEUE *queue, uint idx)
 {
-  uchar *element;
+  int element;
   DBUG_ASSERT(idx < queue->max_elements);
   element= queue->root[++idx];  /* Intern index starts from 1 */
   queue->root[idx]= queue->root[queue->elements--];
@@ -65,12 +56,11 @@ uchar *queue_remove(QUEUE *queue, uint idx)
 
 void _downheap(QUEUE *queue, uint idx)
 {
-  uchar *element;
-  uint elements,half_queue,offset_to_key, next_index;
+  int element;
+  uint elements,half_queue, next_index;
   my_bool first= TRUE;
   uint start_idx= idx;
 
-  offset_to_key=queue->offset_to_key;
   element=queue->root[idx];
   half_queue=(elements=queue->elements) >> 1;
 
@@ -78,15 +68,10 @@ void _downheap(QUEUE *queue, uint idx)
   {
     next_index=idx+idx;
     if (next_index < elements &&
-	(queue->compare(queue->first_cmp_arg,
-			queue->root[next_index]+offset_to_key,
-			queue->root[next_index+1]+offset_to_key) *
-	 queue->max_at_top) > 0)
+	queue->root[next_index] > queue->root[next_index+1])
       next_index++;
-    if (first && 
-        (((queue->compare(queue->first_cmp_arg,
-                          queue->root[next_index]+offset_to_key,
-                          element+offset_to_key) * queue->max_at_top) >= 0)))
+    if (first &&
+	queue->root[next_index] >= element)
     {
       queue->root[idx]= element;
       return;
@@ -99,10 +84,7 @@ void _downheap(QUEUE *queue, uint idx)
   next_index= idx >> 1;
   while (next_index > start_idx)
   {
-    if ((queue->compare(queue->first_cmp_arg,
-                       queue->root[next_index]+offset_to_key,
-                       element+offset_to_key) *
-         queue->max_at_top) < 0)
+    if (queue->root[next_index] < element)
       break;
     queue->root[idx]=queue->root[next_index];
     idx=next_index;

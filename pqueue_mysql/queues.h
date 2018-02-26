@@ -33,25 +33,19 @@ typedef unsigned char uchar;
 typedef char	pchar;
 typedef char	pbool;
 typedef char    my_bool;
-typedef int compare_fun(void * env, uchar * a,uchar * b);
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
 typedef struct st_queue {
-  uchar **root;
-  void *first_cmp_arg;
+  int *root;
   uint elements;
   uint max_elements;
-  uint offset_to_key;	/* compare is done on element+offset */
-  int max_at_top;	/* Normally 1, set to -1 if queue_top gives max */
-  compare_fun *compare;
-  uint auto_extent;
 } QUEUE;
 
 void _downheap(QUEUE *queue,uint idx);
 
-uchar *queue_remove(QUEUE *queue,uint idx);
+int queue_remove(QUEUE *queue,uint idx);
 
 #endif  // QUEUES_INCLUDED
