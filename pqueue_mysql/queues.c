@@ -33,7 +33,7 @@
 #define DBUG_ENTER(s)
 #define DBUG_RETURN(e) return (e)
 #define DBUG_VOID_RETURN return
-#define DBUG_ASSERT assert
+#define DBUG_ASSERT
 
 typedef char    my_bool;
 #define TRUE 1
@@ -147,7 +147,7 @@ predicate is_heap_with_parent_value(list<int> values, int i, int count, int pare
       : true;
 
 predicate is_heap_with_hole(list<int> values, int i, int elements, int hole, int hole_elt) =
-  hole < elements &*&
+  1<=hole &*& hole <= elements &*&
   (i < elements 
   ? i < hole
     ? nth(i/2, values) <= nth(i, values)
@@ -288,23 +288,26 @@ lemma void heap_condition_recovered(int i, int hole, list<int> values, int hole_
 }
 @*/
 
-int rand()
-//@ requires true;
-//@ ensures true;
-{
-  return 0;
-}
-
 
 	/* Remove item from queue */
 	/* Returns pointer to removed element */
 
 int queue_remove(QUEUE *queue, uint idx)
+/// requires is_queue(queue, ?elements) &*& (0 <= idx && idx < elements);
+/// ensures is_queue(queue, elements-1);
 {
   int element;
+  //@ open is_queue(queue, elements);
+  //@ assert( ints(_, _, ?values) );
+  //@ open is_heap(values, 1, elements);
   DBUG_ASSERT(idx < queue->max_elements);
-  element= queue->root[++idx];  /* Intern index starts from 1 */
-  queue->root[idx]= queue->root[queue->elements--];
+  idx++;
+  element= queue->root[idx];  /* Intern index starts from 1 */
+  queue->root[idx]= queue->root[queue->elements];
+  queue->elements--;
+  //@ assert( ints(_, _, ?values2) );
+  //@ close is_heap_with_hole(values2, 1, elements-1, idx, nth(idx, values));
+  //@ close is_queue_with_hole(queue, elements-1, idx, element);
   _downheap(queue, idx);
   return element;
 }
