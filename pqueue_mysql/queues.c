@@ -93,54 +93,6 @@ lemma void shift_right_by_one_ge_0(int i);
 
 /*@
 // TODO ============================
-
-lemma void fake(int i, int hole, list<int> values, int element);
-  requires true;
-  ensures nth(i/2, update(hole, element, values)) < nth(i, update(hole, element, values)) &*& hole < i*2 &*& hole < i*2+1;
-
-lemma void heap_update_preserves_subheap(int i, int hole, list<int> values, int hole_elt)
-  requires is_heap(values, i, ?elements) &*& 0 <= hole &*& hole < i &*& (i < elements ? hole_elt <= nth(i/2, values) : true);
-  ensures is_heap(update(hole, hole_elt, values), i, elements);
-{
-  open is_heap(values, i, elements);
-  if (i < elements) {
-    if (i/2 == hole) {
-      assert 0 <= i;
-      assert i < length(values);
-      div_by_2_ge_0(i);
-      div_by_2_monotone(i, length(values));
-      assert 0 <= i/2;
-      assert i/2 < length(values);
-      assert 0 <= hole;
-      assert hole < length(values);
-      assert hole != i;
-      assert nth(i, update(hole, hole_elt, values)) == nth(i, values);
-      assert nth(i/2, update(hole, hole_elt, values)) == hole_elt;
-      assert hole_elt <= nth(i, values); // FIXME
-      //assert nth(i/2, update(hole, element, values)) <= nth(i, update(hole, element, values));
-      fake(i, hole, values, hole_elt);
-    } else {
-      assert 0 <= i;
-      assert i < length(values);
-      div_by_2_ge_0(i);
-      div_by_2_monotone(i, length(values));
-      assert 0 <= i/2;
-      assert i/2 < length(values);
-      assert 0 <= hole;
-      assert hole < length(values);
-      assert hole != i;
-      assert nth(i, update(hole, hole_elt, values)) == nth(i, values);
-      assert nth(i/2, update(hole, hole_elt, values)) == nth(i/2, values);
-      assert nth(i/2, update(hole, hole_elt, values)) <= nth(i, update(hole, hole_elt, values));
-    }
-    mult_div_by_2_is_identity(i);
-    mult_div_by_2_is_identity_ex(i);
-    heap_update_preserves_subheap(i*2, hole, values, hole_elt);
-    heap_update_preserves_subheap(i*2+1, hole, values, hole_elt);
-  }
-  close is_heap(update(hole, hole_elt, values), i, elements);
-}
-
 lemma void heap_hole_move_down(list<int> values, int idx);
    requires 
      is_heap_with_hole(values, 1, ?elements, idx, ?hole_elt) 
@@ -194,7 +146,8 @@ predicate is_heap_with_hole(list<int> values, int i, int elements, int hole, int
       ? nth(i/2, values) <= hole_elt
         &*& is_heap_with_parent_value(values, i*2, elements, nth(i/2, values)) 
         &*& is_heap_with_parent_value(values, i*2+1, elements, nth(i/2, values))
-      : is_heap(values, i, elements) // hole < i
+      : (i/2!=hole ? nth(i/2, values) <= nth(i, values) : hole_elt <= nth(i/2, values))
+        &*& is_heap(values, i, elements) // hole < i
       )
   : true);
  
@@ -264,12 +217,54 @@ lemma void apply_elements_over_hole_less_than(list<int> values, int n, int hole,
   apply_elements_over_hole_less_than_ex(values, 1, n, hole, element);
 }
 
+lemma void heap_update_preserves_subheap(int i, int hole, list<int> values, int hole_elt)
+  requires is_heap(values, i, ?elements) &*& 0 <= hole &*& hole < i &*& (hole==i/2 ? hole_elt <= nth(i/2, values) : true);
+  ensures is_heap(update(hole, hole_elt, values), i, elements);
+{
+  open is_heap(values, i, elements);
+  if (i < elements) {
+    if (i/2 == hole) {
+      assert 0 <= i;
+      assert i < length(values);
+      div_by_2_ge_0(i);
+      div_by_2_monotone(i, length(values));
+      assert 0 <= i/2;
+      assert i/2 < length(values);
+      assert 0 <= hole;
+      assert hole < length(values);
+      assert hole != i;
+      assert nth(i, update(hole, hole_elt, values)) == nth(i, values);
+      assert nth(i/2, update(hole, hole_elt, values)) == hole_elt;
+      assert hole_elt <= nth(i, values);
+      assert nth(i/2, update(hole, hole_elt, values)) <= nth(i, update(hole, hole_elt, values));
+    } else {
+      assert 0 <= i;
+      assert i < length(values);
+      div_by_2_ge_0(i);
+      div_by_2_monotone(i, length(values));
+      assert 0 <= i/2;
+      assert i/2 < length(values);
+      assert 0 <= hole;
+      assert hole < length(values);
+      assert hole != i;
+      assert nth(i, update(hole, hole_elt, values)) == nth(i, values);
+      assert nth(i/2, update(hole, hole_elt, values)) == nth(i/2, values);
+      assert nth(i/2, update(hole, hole_elt, values)) <= nth(i, update(hole, hole_elt, values));
+    }
+    mult_div_by_2_is_identity(i);
+    mult_div_by_2_is_identity_ex(i);
+    heap_update_preserves_subheap(i*2, hole, values, hole_elt);
+    heap_update_preserves_subheap(i*2+1, hole, values, hole_elt);
+  }
+  close is_heap(update(hole, hole_elt, values), i, elements);
+}
+
 lemma void heap_condition_recovered(int i, int hole, list<int> values, int hole_elt)
    requires 
      is_heap_with_hole(values, i, ?elements, hole, hole_elt) 
      &*& 0 < i
      // 穴の親の条件
-     &*& (1 <= hole/2 ? nth(hole/2, values) <= hole_elt : true)
+     &*& (1 < hole/2 ? nth(hole/2, values) <= hole_elt : true)
      // 穴の子供の条件
      &*& (hole*2 < elements 
           ? hole_elt <= nth(hole*2, values) 
@@ -300,8 +295,6 @@ lemma void heap_condition_recovered(int i, int hole, list<int> values, int hole_
         assert hole_elt <= nth(i*2*2/2, values);
         heap_update_preserves_subheap(i*2*2, hole, values, hole_elt);
         heap_update_preserves_subheap(i*2*2+1, hole, values, hole_elt);
-        //heap_update_preserves_subheap(i*2, hole, values, hole_elt);
-        //heap_update_preserves_subheap(i*2+1, hole, values, hole_elt);
         if (i * 2 + 1 < elements) {
           mult_div_by_2_is_identity(i*2+1);
           mult_div_by_2_is_identity_ex(i*2+1);
@@ -328,8 +321,13 @@ lemma void heap_condition_recovered(int i, int hole, list<int> values, int hole_
       assert nth(i/2, update(hole, hole_elt, values)) <= nth(i, update(hole, hole_elt, values));
       close is_heap(update(hole, hole_elt, values), i, elements);
    } else if(i < elements) { // hole < i
-      open is_heap_with_hole(values, i, elements, hole, hole_elt);
-      heap_update_preserves_subheap(i, hole, values, hole_elt);
+      if (hole!=i/2) {
+        open is_heap_with_hole(values, i, elements, hole, hole_elt);
+        heap_update_preserves_subheap(i, hole, values, hole_elt);
+      } else {
+        open is_heap_with_hole(values, i, elements, hole, hole_elt);
+        heap_update_preserves_subheap(i, hole, values, hole_elt);
+      }
    }
 }
 
